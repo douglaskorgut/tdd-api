@@ -1,5 +1,6 @@
 import { SignUpController } from './signup'
 import { HttpRequest, HttpResponse } from '../protocols/http'
+import { MissingParamError } from '../errors/MissingParamError';
 
 describe('SignUp Controller', () => {
   test('should return 400 if no nome is provided', () => {
@@ -16,7 +17,7 @@ describe('SignUp Controller', () => {
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
-    expect(httpResponse.body).toEqual(new Error('Missing param: name'))
+    expect(httpResponse.body).toEqual(new MissingParamError('name'))
   })
 
   test('should return 400 if no email is provided', () => {
@@ -33,6 +34,6 @@ describe('SignUp Controller', () => {
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
-    expect(httpResponse.body).toEqual(new Error('Missing param: email'))
+    expect(httpResponse.body).toEqual(new MissingParamError('email'))
   })
 })
