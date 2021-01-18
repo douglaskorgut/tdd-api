@@ -105,7 +105,7 @@ describe('SignUp Controller', () => {
         name: 'any_name',
         email: 'email@gmail.com',
         password: 'password',
-        passwordConfirmation: 'passwordConfirmation'
+        passwordConfirmation: 'password'
       }
     }
     const email = httpRequest.body.email
@@ -114,6 +114,24 @@ describe('SignUp Controller', () => {
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new InvalidParamError(email))
+  })
+
+  test('should return 400 if password confirmation fails', () => {
+    // sut = system under test
+    const sut = makeSutType().sut
+    const httpRequest: HttpRequest = {
+      body: {
+        name: 'any_name',
+        email: 'email@gmail.com',
+        password: 'password',
+        passwordConfirmation: 'passwordConfirmation'
+      }
+    }
+    const httpResponse: HttpResponse = sut.handle(httpRequest)
+    // toBe expect to identical objects
+    expect(httpResponse.statusCode).toBe(400)
+    // toEqual expect identical values
+    expect(httpResponse.body).toEqual(new InvalidParamError('passwordConfirmation'))
   })
 
   test('Should call EmailValidator with correct email', () => {
@@ -127,7 +145,7 @@ describe('SignUp Controller', () => {
         name: 'any_name',
         email: 'email@gmail.com',
         password: 'password',
-        passwordConfirmation: 'passwordConfirmation'
+        passwordConfirmation: 'password'
       }
     }
     sutType.sut.handle(httpRequest)
@@ -145,7 +163,7 @@ describe('SignUp Controller', () => {
         name: 'any_name',
         email: 'email@gmail.com',
         password: 'password',
-        passwordConfirmation: 'passwordConfirmation'
+        passwordConfirmation: 'password'
       }
     }
     const httpResponse: HttpResponse = sut.handle(httpRequest)
