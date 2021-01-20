@@ -244,7 +244,8 @@ describe('SignUp Controller', () => {
     expect(body).toEqual({
       id: 'valid_id',
       name: 'valid_name',
-      email: 'valid_email'
+      email: 'valid_email',
+      password: 'valid_password'
     })
   })
 })
