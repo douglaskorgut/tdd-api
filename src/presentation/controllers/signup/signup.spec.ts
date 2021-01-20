@@ -31,14 +31,14 @@ const makeEmailValidator = (): EmailValidator => {
 
 const makeAddAccount = (): AddAccount => {
   class AddAccountStub implements AddAccount {
-    add (account: AddAccountModel): AccountModel {
+    async add (account: AddAccountModel): Promise<AccountModel> {
       const fakeAccount = {
         id: 'valid_id',
         name: 'valid_name',
         email: 'valid_email',
         password: 'valid_password'
       }
-      return fakeAccount
+      return new Promise((resolve) => resolve(fakeAccount))
     }
   }
   const addAccountStub = new AddAccountStub()
@@ -46,7 +46,7 @@ const makeAddAccount = (): AddAccount => {
 }
 
 describe('SignUp Controller', () => {
-  test('should return 400 if no nome is provided', () => {
+  test('should return 400 if no nome is provided', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const httpRequest: HttpRequest = {
@@ -56,14 +56,14 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'passwordConfirmation'
       }
     }
-    const httpResponse: HttpResponse = sutType.sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sutType.sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new MissingParamError('name'))
   })
 
-  test('should return 400 if no email is provided', () => {
+  test('should return 400 if no email is provided', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const httpRequest: HttpRequest = {
@@ -73,14 +73,14 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'passwordConfirmation'
       }
     }
-    const httpResponse: HttpResponse = sutType.sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sutType.sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new MissingParamError('email'))
   })
 
-  test('should return 400 if no password is provided', () => {
+  test('should return 400 if no password is provided', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const httpRequest: HttpRequest = {
@@ -90,14 +90,14 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'passwordConfirmation'
       }
     }
-    const httpResponse: HttpResponse = sutType.sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sutType.sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new MissingParamError('password'))
   })
 
-  test('should return 400 if no password confirmation is provided', () => {
+  test('should return 400 if no password confirmation is provided', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const httpRequest: HttpRequest = {
@@ -107,14 +107,14 @@ describe('SignUp Controller', () => {
         password: 'password'
       }
     }
-    const httpResponse: HttpResponse = sutType.sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sutType.sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new MissingParamError('passwordConfirmation'))
   })
 
-  test('should return 400 if invalid email provided', () => {
+  test('should return 400 if invalid email provided', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const emailValidatorStub = sutType.emailValidator
@@ -128,14 +128,14 @@ describe('SignUp Controller', () => {
       }
     }
     const email = httpRequest.body.email
-    const httpResponse: HttpResponse = sutType.sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sutType.sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new InvalidParamError(email))
   })
 
-  test('should return 400 if password confirmation fails', () => {
+  test('should return 400 if password confirmation fails', async () => {
     // sut = system under test
     const sut = makeSutType().sut
     const httpRequest: HttpRequest = {
@@ -146,14 +146,14 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'passwordConfirmation'
       }
     }
-    const httpResponse: HttpResponse = sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(400)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new InvalidParamError('passwordConfirmation'))
   })
 
-  test('Should call EmailValidator with correct email', () => {
+  test('Should call EmailValidator with correct email', async () => {
     // sut = system under test
     const sutType = makeSutType()
     const emailValidatorStub = sutType.emailValidator
@@ -167,11 +167,11 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'password'
       }
     }
-    sutType.sut.handle(httpRequest)
+    await sutType.sut.handle(httpRequest)
     expect(isValidSpy).toBeCalledWith('email@gmail.com')
   })
 
-  test('should return 500 if invalid email validator throws', () => {
+  test('should return 500 if invalid email validator throws', async () => {
     // sut = system under test
     const { sut, emailValidator } = makeSutType()
     jest.spyOn(emailValidator, 'isValid').mockImplementationOnce(() => {
@@ -185,14 +185,14 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'password'
       }
     }
-    const httpResponse: HttpResponse = sut.handle(httpRequest)
+    const httpResponse: HttpResponse = await sut.handle(httpRequest)
     // toBe expect to identical objects
     expect(httpResponse.statusCode).toBe(500)
     // toEqual expect identical values
     expect(httpResponse.body).toEqual(new ServerError())
   })
 
-  test('should call AddAccount with correct values', () => {
+  test('should call AddAccount with correct values', async () => {
     const { sut, addAccount } = makeSutType()
     const addSpy = jest.spyOn(addAccount, 'add')
     const httpRequest = {
@@ -203,7 +203,7 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'any_password'
       }
     }
-    sut.handle(httpRequest)
+    await sut.handle(httpRequest)
     expect(addSpy).toHaveBeenCalledWith({
       name: 'any_name',
       email: 'email@gmail.com',
@@ -211,10 +211,10 @@ describe('SignUp Controller', () => {
     })
   })
 
-  test('should return 500 if AddAccount throws', () => {
+  test('should return 500 if AddAccount throws', async () => {
     const { sut, addAccount } = makeSutType()
-    jest.spyOn(addAccount, 'add').mockImplementationOnce(() => {
-      throw new Error()
+    jest.spyOn(addAccount, 'add').mockImplementationOnce(async () => {
+      return new Promise((resolve, reject) => reject(new Error()))
     })
     const httpRequest: HttpRequest = {
       body: {
@@ -224,12 +224,12 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'password'
       }
     }
-    const { statusCode, body } = sut.handle(httpRequest)
+    const { statusCode, body } = await sut.handle(httpRequest)
     expect(statusCode).toBe(500)
     expect(body).toEqual(new ServerError())
   })
 
-  test('should return 200 if valid data is provided', () => {
+  test('should return 200 if valid data is provided', async () => {
     const { sut } = makeSutType()
     const httpRequest: HttpRequest = {
       body: {
@@ -239,7 +239,7 @@ describe('SignUp Controller', () => {
         passwordConfirmation: 'valid_password'
       }
     }
-    const { statusCode, body } = sut.handle(httpRequest)
+    const { statusCode, body } = await sut.handle(httpRequest)
     expect(statusCode).toBe(200)
     expect(body).toEqual({
       id: 'valid_id',
