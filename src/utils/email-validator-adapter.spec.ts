@@ -1,0 +1,5 @@
+describe('EmailValidator Adapter', () => {
+  test('', () => {
+
+  })
+})
